@@ -14,14 +14,15 @@ pipeline {
 
         stage('Preparar Entorno Virtual') {
             steps {
-                echo 'Buscando version estable de Python y preparando entorno virtual...'
+                echo 'Preparando entorno virtual e instalando dependencias...'
                 bat """
-                @echo off
-                :: Intentar usar Python 3.12 o 3.11 si estan instalados en el sistema
-                py -3.12 -m venv venv 2>nul || py -3.11 -m venv venv 2>nul || python -m venv venv
-                
+                python -m venv venv
                 call venv\\Scripts\\activate
                 python -m pip install --upgrade pip
+                
+                :: Forzar instalacion de una version de greenlet compatible o precompilada
+                pip install greenlet --pre --only-binary :all: 2>nul || pip install greenlet>=3.1.0a1 || echo "Continuando con el requirements..."
+                
                 pip install -r requirements.txt
                 """
             }
