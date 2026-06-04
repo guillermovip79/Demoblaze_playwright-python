@@ -9,7 +9,7 @@ class HomePage(BasePage):
         self.add_to_cart_button = page.locator('text=Add to cart')
 
     def navigate(self):
-        self.open_url('https://demoblaze.com')
+        self.navigate_to('https://demoblaze.com')
 
     def select_first_product(self):
         self.click_element(self.first_product)
