@@ -18,8 +18,6 @@ scenarios('../features/checkout.feature')
 @given('que el usuario navega a la página de inicio de Demoblaze')
 def navegar_a_inicio(page_context):
     with allure.step("Abrir el sitio web de DemoBlaze"):
-        page_context.home_page = HomePage(page_context)
-        page_context.cart_page = CartPage(page_context)
         page_context.home_page.navigate()
         page_context.home_page.take_screenshot("Página de inicio cargada")
 

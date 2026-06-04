@@ -2,9 +2,9 @@ import allure
 from .base_page import BasePage
 from playwright.sync_api import Page, expect
 
-class CartPage:
+class CartPage(BasePage):
     def __init__(self, page: Page):
-        self.page = page
+        super().__init__(page)
         # Localizadores
         self.cart_link = page.locator('#cartur')
         self.place_order_button = page.locator('button:has-text("Place Order")')

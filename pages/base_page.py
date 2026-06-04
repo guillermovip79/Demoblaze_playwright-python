@@ -23,6 +23,10 @@ class BasePage:
         """Espera a que un selector esté visible."""
         self.page.wait_for_selector(selector, timeout=timeout)
 
+    def click_element(self, locator):
+        """Hace clic en un elemento web usando su localizador."""
+        locator.click()
+
     def take_screenshot(self, name: str = "screenshot"):
         """
         Toma una captura de pantalla y la adjunta al reporte Allure.
