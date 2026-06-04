@@ -1,71 +1,45 @@
-"""
-Page Object para la página del carrito en sauce-demo.myshopify.com.
-"""
 import allure
 from .base_page import BasePage
+from playwright.sync_api import Page, expect
 
+class CartPage:
+    def __init__(self, page: Page):
+        self.page = page
+        # Localizadores
+        self.cart_link = page.locator('#cartur')
+        self.place_order_button = page.locator('button:has-text("Place Order")')
+        self.name_input = page.locator('#name')
+        self.country_input = page.locator('#country')
+        self.city_input = page.locator('#city')
+        self.card_input = page.locator('#card')
+        self.month_input = page.locator('#month')
+        self.year_input = page.locator('#year')
+        self.purchase_button = page.locator('button:has-text("Purchase")')
+        self.success_message = page.locator('text=Thank you for your purchase!')
+        self.ok_button = page.locator('button:has-text("OK")')
 
-class CartPage(BasePage):
-    """
-    Representa la página del carrito de compras.
-    URL: https://sauce-demo.myshopify.com/cart
-    """
+    def go_to_cart(self):
+        self.cart_link.click()
+        # Esperamos a que cargue la tabla del carrito
+        self.page.wait_for_selector('.success')
 
-    # ── Selectores ──────────────────────────────────────────────────────────
-    CART_URL = "https://sauce-demo.myshopify.com/cart"
-    CART_ITEM_TITLE = "div.info h3 a"
-    CART_ITEM_LINK = "a[href*='/products/']"
+    def open_checkout_form(self):
+        self.place_order_button.click()
+        self.page.wait_for_selector('#name')
 
-    def __init__(self, page):
-        super().__init__(page)
+    def fill_checkout_form(self, name, country, city, card, month, year):
+        self.name_input.fill(name)
+        self.country_input.fill(country)
+        self.city_input.fill(city)
+        self.card_input.fill(card)
+        self.month_input.fill(month)
+        self.year_input.fill(year)
 
-    # ── Acciones ─────────────────────────────────────────────────────────────
+    def submit_order(self):
+        self.purchase_button.click()
 
-    def open(self):
-        """Navega directamente a la página del carrito."""
-        with allure.step(f"Navegar al carrito: {self.CART_URL}"):
-            self.navigate_to(self.CART_URL)
-            self.page.wait_for_load_state("networkidle")
-            self.take_screenshot("Página del carrito cargada")
+    def verify_success_purchase(self):
+        expect(self.success_message).to_be_visible()
 
-    def get_cart_item_names(self) -> list[str]:
-        """Retorna una lista con los nombres de todos los artículos en el carrito."""
-        with allure.step("Obtener nombres de artículos en el carrito"):
-            # Esperar a que el elemento esté en el DOM (puede estar oculto por CSS del drawer)
-            self.page.wait_for_selector(self.CART_ITEM_TITLE, state="attached", timeout=10000)
-            items = self.page.locator(self.CART_ITEM_TITLE).all()
-            names = [item.inner_text().strip() for item in items]
-            allure.attach(
-                "\n".join(names) if names else "(carrito vacío)",
-                name="Artículos en el carrito",
-                attachment_type=allure.attachment_type.TEXT,
-            )
-            return names
-
-    def is_product_in_cart(self, product_name: str) -> bool:
-        """
-        Verifica si un producto específico está en el carrito.
-        Usa el texto completo del body para mayor robustez ante elementos ocultos por CSS.
-        La comparación es case-insensitive.
-        """
-        with allure.step(f"Verificar que '{product_name}' está en el carrito"):
-            try:
-                body_text = self.page.locator("body").inner_text()
-                found = product_name.lower() in body_text.lower()
-                allure.attach(
-                    f"Buscando: '{product_name}'\nResultado: {'✅ Encontrado' if found else '❌ No encontrado'}",
-                    name="Resultado de verificación",
-                    attachment_type=allure.attachment_type.TEXT,
-                )
-                self.take_screenshot(
-                    "Carrito con producto" if found else "Carrito — producto NO encontrado"
-                )
-                return found
-            except Exception as e:
-                self.take_screenshot_on_failure("Error al verificar carrito")
-                allure.attach(
-                    str(e),
-                    name="Error en verificación",
-                    attachment_type=allure.attachment_type.TEXT,
-                )
-                return False
+    def close_success_modal(self):
+        self.ok_button.click()
