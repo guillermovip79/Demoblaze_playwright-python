@@ -14,11 +14,14 @@ pipeline {
 
         stage('Preparar Entorno Virtual') {
             steps {
-                echo 'Creando entorno virtual e instalando dependencias...'
+                echo 'Buscando version estable de Python y preparando entorno virtual...'
                 bat """
-                python -m venv venv
+                @echo off
+                :: Intentar usar Python 3.12 o 3.11 si estan instalados en el sistema
+                py -3.12 -m venv venv 2>nul || py -3.11 -m venv venv 2>nul || python -m venv venv
+                
                 call venv\\Scripts\\activate
-                pip install --upgrade pip
+                python -m pip install --upgrade pip
                 pip install -r requirements.txt
                 """
             }
